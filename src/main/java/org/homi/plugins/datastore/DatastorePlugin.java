@@ -109,6 +109,6 @@ public class DatastorePlugin extends AbstractBasicPlugin {
 	}
 	@Override
 	public void teardown() {
-		// TODO Auto-generated method stub
+		observerQueue.shutdown();
 	}
 }
