@@ -1,6 +1,7 @@
 package org.homi.plugins.datastore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,11 +25,11 @@ public class DatastorePlugin extends AbstractBasicPlugin {
 		// TODO Auto-generated method stub
 		CommanderBuilder<DatastoreSpec> cb = new CommanderBuilder<>(DatastoreSpec.class) ;
 		
-		
 		Commander<DatastoreSpec> c = cb.onCommandEquals(DatastoreSpec.CREATE, this::create).
 										onCommandEquals(DatastoreSpec.READ, this::read).
 										onCommandEquals(DatastoreSpec.UPDATE, this::update).
 										onCommandEquals(DatastoreSpec.DELETE, this::delete).
+										onCommandEquals(DatastoreSpec.GET_ALL, this::getAllData).
 										onCommandEquals(DatastoreSpec.OBSERVE, this::observe).
 										build();
 		
@@ -41,7 +42,6 @@ public class DatastorePlugin extends AbstractBasicPlugin {
 		private Object value;
 		
 		public Datum(Object object) {
-			// TODO Auto-generated constructor stub
 			value = object;
 		}
 
@@ -107,8 +107,19 @@ public class DatastorePlugin extends AbstractBasicPlugin {
 		DatastorePlugin.datastore.get((String)objects[0]).attach((IObserver)objects[1]);
 		return null;
 	}
+	
+
+	private Map<String, Object> getAllData(Object ...objects) {
+		Map<String, Object> result = new HashMap<>();
+		DatastorePlugin.datastore.forEach((k, d)->{result.put(k, d.getvalue());});
+		return result;
+	}
+	
 	@Override
 	public void teardown() {
-		observerQueue.shutdown();
+		DatastorePlugin.datastore.forEach((k,d)->{
+			d.observers.forEach((o)->{d.detach(o);});
+			});
+		DatastorePlugin.datastore.clear();
 	}
 }
