@@ -100,6 +100,10 @@ public class DatastorePlugin extends AbstractBasicPlugin {
 	}
 
 	private Void delete(Object ...objects) {
+		String key = (String) objects[0];
+		var d = DatastorePlugin.datastore.get(key);
+		d.observers.forEach((o)->{d.detach(o);});
+		DatastorePlugin.datastore.remove(key);
 		return null;
 	}
 
